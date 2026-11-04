@@ -1,0 +1,1984 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>이음스쿨 - 학생 생활지도 관리 시스템</title>
+  
+  <!-- 다중 시트 엑셀(.xlsx) 내보내기를 위한 SheetJS 라이브러리 연동 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+  <!-- 생활지도 시스템 맞춤형 고품질 아이콘 -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='110' fill='%234338ca'/%3E%3Cpath d='M256 128c-44.18 0-80 35.82-80 80s35.82 80 80 80 80-35.82 80-80-35.82-80-80-80zm0 213.33c-53.33 0-160 26.67-160 80v42.67h320V421.33c0-53.33-106.67-80-160-80z' fill='%23ffffff'/%3E%3Cpath d='M384 149.33V213.33h42.67V149.33H469V106.67h-42.33V64H384v42.67h-42.33v42.67H384z' fill='%2310b981'/%3E%3C/svg%3E">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='110' fill='%234338ca'/%3E%3Cpath d='M256 128c-44.18 0-80 35.82-80 80s35.82 80 80 80 80-35.82 80-35.82-80-80-80zm0 213.33c-53.33 0-160 26.67-160 80v42.67h320V421.33c0-53.33-106.67-80-160-80z' fill='%23ffffff'/%3E%3Cpath d='M384 149.33V213.33h42.67V149.33H469V106.67h-42.33V64H384v42.67h-42.33v42.67H384z' fill='%2310b981'/%3E%3C/svg%3E">
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
+    
+    /* 세련된 배경 그라데이션 및 질감 부여 */
+    body { 
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); 
+      background-attachment: fixed;
+      color: #334155; 
+      padding-bottom: 60px; 
+    }
+    
+    /* Header (고급스러운 다크 인디고 그라데이션 및 입체감) */
+    header { 
+      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%); 
+      color: white; 
+      padding: 24px 32px; 
+      box-shadow: 0 10px 30px -5px rgba(30, 27, 75, 0.3); 
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .header-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+    
+    /* 타이틀 클릭 인터랙션 스타일 */
+    .header-title { 
+      cursor: pointer; 
+      user-select: none; 
+      transition: transform 0.2s ease, opacity 0.2s ease; 
+    }
+    .header-title:hover { 
+      opacity: 0.9; 
+      transform: translateY(-1px);
+    }
+    
+    .header-title h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; text-shadow: 0 2px 4px rgba(0,0,0,0.15); }
+    .header-title p { font-size: 13px; color: #cbd5e1; margin-top: 4px; font-weight: 500; }
+    .header-user-info { display: flex; align-items: center; gap: 12px; font-size: 13px; background: rgba(255, 255, 255, 0.1); padding: 8px 14px; border-radius: 14px; backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.15); }
+    .user-badge { padding: 4px 10px; border-radius: 20px; font-weight: 700; font-size: 11px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .badge-admin { background-color: #ef4444; color: white; }
+    .badge-teacher { background-color: #10b981; color: white; }
+    .badge-sub { background-color: #64748b; color: white; }
+    
+    /* Buttons */
+    .btn { padding: 9px 16px; border-radius: 10px; font-size: 13px; font-weight: 600; border: none; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .btn:active { transform: translateY(1px); }
+    .btn-indigo { background-color: #4338ca; color: white; border: 1px solid #4f46e5; }
+    .btn-indigo:hover { background-color: #3730a3; box-shadow: 0 4px 12px rgba(67, 56, 202, 0.35); }
+    .btn-emerald { background-color: #059669; color: white; }
+    .btn-emerald:hover { background-color: #047857; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.35); }
+    .btn-slate { background-color: #475569; color: white; }
+    .btn-slate:hover { background-color: #334155; }
+    .btn-rose { background-color: #e11d48; color: white; }
+    .btn-rose:hover { background-color: #be123c; box-shadow: 0 4px 12px rgba(225, 29, 72, 0.35); }
+    
+    /* Layout */
+    main { max-width: 1200px; margin: 28px auto 0; padding: 0 16px; }
+    
+    /* Tabs */
+    .tabs { display: flex; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(8px); padding: 6px; border-radius: 14px; border: 1px solid #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 24px; }
+    .tab-btn { flex: 1; padding: 11px; border: none; background: transparent; font-size: 14px; font-weight: 700; color: #64748b; cursor: pointer; border-radius: 10px; transition: all 0.2s ease; }
+    .tab-btn.active { background-color: #4338ca; color: white; box-shadow: 0 4px 12px rgba(67, 56, 202, 0.25); }
+    
+    /* Summary Cards */
+    .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); padding: 22px; border-radius: 18px; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.04), 0 8px 10px -6px rgba(0,0,0,0.04); transition: transform 0.2s, box-shadow 0.2s; position: relative; overflow: hidden; }
+    .card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: #4338ca; }
+    .card:hover { transform: translateY(-3px); box-shadow: 0 15px 30px -5px rgba(0,0,0,0.08); }
+    .card p.title { font-size: 12px; color: #64748b; font-weight: 700; letter-spacing: -0.3px; }
+    .card p.val { font-size: 28px; font-weight: 800; color: #1e293b; margin-top: 6px; }
+    
+    /* Main Content Grid */
+    .content-grid { display: grid; grid-template-columns: 1fr; gap: 24px; }
+    @media (min-width: 992px) { .content-grid { grid-template-columns: 7fr 5fr; } }
+    
+    .panel { background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(12px); padding: 28px; border-radius: 22px; border: 1px solid #e2e8f0; box-shadow: 0 12px 35px -5px rgba(0,0,0,0.05); }
+    .panel-title { font-size: 16px; font-weight: 700; color: #1e293b; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+    .badge-num { width: 28px; height: 28px; background: linear-gradient(135deg, #4338ca 0%, #312e81 100%); color: white; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; font-size: 12px; font-weight: 700; box-shadow: 0 3px 8px rgba(67, 56, 202, 0.3); }
+    
+    /* Form Elements */
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px; }
+    .input-text, .select-box { width: 100%; padding: 12px 14px; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 14px; background: #f8fafc; outline: none; transition: all 0.2s; }
+    .input-text:focus, .select-box:focus { background: white; border-color: #4338ca; box-shadow: 0 0 0 4px rgba(67, 56, 202, 0.12); }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    
+    /* Violation Buttons */
+    .viol-btns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+    .btn-viol { padding: 12px 10px; border: 1px solid #cbd5e1; border-radius: 12px; background: rgba(255,255,255,0.9); font-size: 13px; font-weight: 700; color: #334155; text-align: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+    .btn-viol:hover { border-color: #4338ca; background: #e0e7ff; color: #4338ca; transform: translateY(-1px); }
+    .btn-viol.selected { background: linear-gradient(135deg, #4338ca 0%, #3730a3 100%); color: white; border-color: #312e81; box-shadow: 0 4px 12px rgba(67, 56, 202, 0.3); }
+    
+    /* Active Student Banner */
+    .banner { background: linear-gradient(135deg, #e0e7ff 0%, #ede9fe 100%); border: 1px solid #c7d2fe; padding: 14px 18px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; margin-top: 14px; box-shadow: inset 0 1px 2px rgba(255,255,255,0.6); }
+    .banner-info { display: flex; align-items: center; gap: 10px; }
+    .tag { background: #4338ca; color: white; padding: 3px 10px; border-radius: 8px; font-size: 12px; font-weight: 700; }
+    .tag-rose { background: #ffe4e6; color: #e11d48; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+    
+    /* Filter Bar inside History Panel */
+    .history-filter-box { background: #f8fafc; border: 1px solid #cbd5e1; padding: 12px; border-radius: 14px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .filter-row { display: flex; gap: 8px; align-items: center; }
+    
+    /* History List */
+    .history-list { max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 4px; }
+    .history-item { padding: 14px 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; display: flex; gap: 12px; align-items: flex-start; transition: background 0.15s; }
+    .history-item:hover { background: #f1f5f9; }
+    .history-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .history-type { background: #e0e7ff; color: #4338ca; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; display: inline-block; }
+    .history-date { font-size: 11px; color: #64748b; }
+    .btn-toggle-ref { padding: 5px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; border: none; cursor: pointer; margin-top: 8px; transition: 0.2s; }
+    .ref-done { background-color: #d1fae5; color: #047857; }
+    .ref-pending { background-color: #ffe4e6; color: #be123c; }
+    .ref-disabled { background-color: #e2e8f0; color: #94a3b8; cursor: not-allowed; }
+    
+    /* Table */
+    .table-container { overflow-x: auto; background: white; border-radius: 14px; border: 1px solid #cbd5e1; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+    th { background: #f8fafc; padding: 14px 16px; border-bottom: 1px solid #cbd5e1; font-size: 12px; color: #475569; font-weight: 700; }
+    td { padding: 14px 16px; border-bottom: 1px solid #f1f5f9; }
+    
+    /* Modal & Login Overlay - 세련된 색감 및 입체감 적용 */
+    .modal-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 999; }
+    .modal-box { background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); width: 90%; max-width: 440px; padding: 32px; border-radius: 24px; box-shadow: 0 25px 60px -15px rgba(30, 27, 75, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.8) inset; max-height: 90vh; overflow-y: auto; }
+    .hidden { display: none !important; }
+    
+    /* Bar Charts */
+    .bar-chart-container { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+    .bar-row { display: flex; align-items: center; gap: 12px; font-size: 12px; font-weight: 600; }
+    .bar-label { width: 130px; text-align: right; color: #475569; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .bar-track { flex: 1; background: #f1f5f9; height: 22px; border-radius: 8px; overflow: hidden; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05); }
+    .bar-fill { height: 100%; background: linear-gradient(90deg, #4338ca 0%, #6366f1 100%); border-radius: 8px; transition: width 0.4s ease; }
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN OVERLAY -->
+  <div id="loginOverlay" class="modal-backdrop">
+    <div class="modal-box">
+      <div style="text-align:center; margin-bottom:22px;">
+        <div style="width:52px; height:52px; background:linear-gradient(135deg, #4338ca 0%, #312e81 100%); border-radius:16px; margin:0 auto 12px; display:flex; align-items:center; justify-content:center; box-shadow: 0 8px 16px rgba(67, 56, 202, 0.25);">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="26" height="26" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+        </div>
+        <h2 style="font-size:22px; font-weight:800; color:#1e293b; letter-spacing:-0.5px; margin-bottom:4px;">이음스쿨 로그인</h2>
+        <p style="font-size:13px; color:#64748b; font-weight:500;">학생 생활지도 관리 시스템에 오신 것을 환영합니다.</p>
+      </div>
+      
+      <form onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label class="form-label">아이디 (ID)</label>
+          <input type="text" id="loginId" class="input-text" placeholder="아이디 입력 (기본: 관리자)" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">비밀번호 (PW)</label>
+          <input type="password" id="loginPw" class="input-text" placeholder="비밀번호 입력" required>
+        </div>
+        
+        <!-- 로그인 상태 유지 체크박스 영역 -->
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:20px; background:#f8fafc; padding:10px 12px; border-radius:10px; border:1px solid #e2e8f0;">
+          <input type="checkbox" id="keepLoggedIn" style="width:16px; height:16px; accent-color:#4338ca; cursor:pointer;">
+          <label for="keepLoggedIn" style="font-size:13px; font-weight:600; color:#475569; cursor:pointer; user-select:none;">로그인 상태 유지</label>
+        </div>
+
+        <button type="submit" class="btn btn-indigo" style="width:100%; padding:13px; font-size:14px; font-weight:700;">로그인</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MAIN HEADER -->
+  <header>
+    <div class="header-container">
+      <div class="header-title" onclick="location.reload()" title="클릭하면 페이지가 새로고침됩니다">
+        <h1>이음스쿨</h1>
+        <p>학생 생활지도 관리 시스템</p>
+      </div>
+      
+      <div id="headerUserInfo" class="header-user-info hidden">
+        <span id="userRoleBadge" class="user-badge badge-admin">관리자</span>
+        <span id="userNameDisplay" style="font-weight:bold;">관리자님</span>
+        <button class="btn btn-indigo" style="padding:4px 10px; font-size:11px;" onclick="openChangePwModal()">비밀번호 변경</button>
+        <button class="btn btn-slate" style="padding:4px 10px; font-size:11px;" onclick="handleLogout()">로그아웃</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- TOP TOOLBAR -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:8px;">
+      <div class="tabs" style="margin-bottom:0; flex:1; max-width:400px;">
+        <button id="btnTab1" class="tab-btn active" onclick="switchTab('record')">위반 입력 & 학생 조회</button>
+        <button id="btnTab2" class="tab-btn" onclick="switchTab('stats')">기간별 & 학급별 통계</button>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+        <div style="display:flex; align-items:center; background:rgba(255,255,255,0.9); padding:4px 12px; border-radius:10px; border:1px solid #cbd5e1; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+          <span style="font-size:12px; font-weight:bold; color:#4338ca; margin-right:6px;">🎓 학년도:</span>
+          <select id="operatingYearSelect" class="select-box" style="padding:4px 8px; font-size:12px; width:auto; border:none; background:transparent;" onchange="onOperatingYearChange()"></select>
+        </div>
+
+        <button id="btnAdminBatch" class="btn btn-indigo admin-only hidden" onclick="openBatchModal()">학생 일괄등록</button>
+        <button id="btnAdminViolationConfig" class="btn btn-indigo admin-only hidden" onclick="openViolationConfigModal()">위반항목 관리</button>
+        <button id="btnAdminStudentManage" class="btn btn-slate admin-only hidden" onclick="openStudentManageModal()">학생 명단 관리</button>
+        <button id="btnAdminTeachers" class="btn btn-slate admin-only hidden" onclick="openTeacherModal()">교사 계정 관리</button>
+      </div>
+    </div>
+
+    <!-- 과거 학년도 조회 시 경고 바 -->
+    <div id="archiveNoticeBanner" class="hidden" style="background:#fffbebf8; border:1px solid #fde68a; color:#b45309; padding:12px 16px; border-radius:12px; margin-bottom:16px; font-size:13px; font-weight:600; display:flex; justify-content:space-between; align-items:center; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
+      <span>⚠️ 현재 <strong><span id="noticeYearText"></span>학년도 보관 데이터(아카이브)</strong>를 조회 중입니다. (수정 불가능, 조회 전용)</span>
+      <button onclick="resetToCurrentYear()" class="btn btn-indigo" style="padding:4px 10px; font-size:11px;">현재 학년도로 돌아가기</button>
+    </div>
+
+    <!-- TAB 1: 입력 및 개인조회 -->
+    <div id="tabRecord">
+      <div class="cards-grid">
+        <div class="card"><p class="title">총 등록 학생</p><p class="val" id="statTotalStudents">0명</p></div>
+        <div class="card"><p class="title">총 위반 누적</p><p class="val" id="statTotalViolations">0건</p></div>
+        <div class="card"><p class="title">성찰문 미제출</p><p class="val" id="statPendingReflections" style="color:#e11d48;">0건</p></div>
+        <div class="card"><p class="title">오늘 위반 지도</p><p class="val" id="statTodayViolations">0건</p></div>
+      </div>
+
+      <div class="content-grid">
+        <!-- 좌측 입력 영역 -->
+        <div>
+          <!-- 1. 학생 선택 -->
+          <div class="panel" style="margin-bottom:20px;">
+            <div class="panel-title"><span class="badge-num">1</span>학생 선택</div>
+            
+            <div class="form-group">
+              <label class="form-label">통합 학번/이름 검색 (자동 동기화)</label>
+              <input type="text" id="studentSearchInput" class="input-text" placeholder="학번(예: 10501) 또는 이름 입력 시 자동 검색" onkeyup="onSearchInput()">
+            </div>
+
+            <div class="grid-2">
+              <div>
+                <label class="form-label">학년·반 선택 (예: 105)</label>
+                <select id="classGroupSelect" class="select-box" onchange="onClassGroupChange()">
+                  <option value="">학년·반 선택...</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label">번호·이름 선택 (예: 01)</label>
+                <select id="numberSelect" class="select-box" onchange="onNumberChange()" disabled>
+                  <option value="">번호 선택...</option>
+                </select>
+              </div>
+            </div>
+
+            <div id="selectedStudentBanner" class="banner hidden">
+              <div class="banner-info">
+                <span class="tag" id="bannerStudentId">10501</span>
+                <strong id="bannerStudentName" style="font-size:15px; color:#1e293b;">강해린</strong>
+                <span id="bannerPendingBadge" class="tag-rose hidden">미제출 N건</span>
+              </div>
+              <span style="font-size:12px; color:#4338ca; font-weight:bold;">선택됨</span>
+            </div>
+          </div>
+
+          <!-- 2. 위반사항 입력 -->
+          <div class="panel">
+            <div class="panel-title"><span class="badge-num">2</span>위반 사항 입력</div>
+            
+            <div class="form-group">
+              <label class="form-label">위반 날짜 (한국 기준 오늘 날짜 자동 지정)</label>
+              <input type="date" id="violationDate" class="input-text" onchange="onManualDateChange()">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">위반 항목 선택 (<strong>중복 선택 가능 - 선택된 항목별로 개별 건 생성</strong>)</label>
+              <div id="violationButtonsContainer" class="viol-btns">
+                <!-- 동적 렌더링 -->
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">세부 메모 / 기타 사유 입력</label>
+              <input type="text" id="violationNote" class="input-text" placeholder="'기타' 선택 시 세부 사유를 입력하세요.">
+            </div>
+
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:18px;">
+              <input type="checkbox" id="reflectionSubmittedDirectly" style="width:16px; height:16px; accent-color:#4338ca;">
+              <label for="reflectionSubmittedDirectly" style="font-size:13px; font-weight:600; color:#475569; cursor:pointer;">성찰문을 현장에서 바로 수령함 (제출 완료로 즉시 기록)</label>
+            </div>
+
+            <button type="button" id="btnSubmitViolation" class="btn btn-indigo" style="width:100%; padding:13px; font-size:14px;" onclick="confirmAndRecordViolation()">위반사항 등록 확인</button>
+          </div>
+        </div>
+
+        <!-- 우측 지도 이력 & 조회 필터 -->
+        <div class="panel" style="display:flex; flex-direction:column; justify-content:space-between;">
+          <div>
+            <div class="panel-title" style="justify-content:space-between; flex-wrap:wrap; gap:6px;">
+              <span>학생별 지도 & 성찰문 이력</span>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <label id="selectAllContainer" class="admin-only hidden" style="font-size:11px; color:#475569; display:flex; align-items:center; gap:4px; cursor:pointer;">
+                  <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll(this.checked)"> 전체 선택
+                </label>
+                <span id="recordCountBadge" style="font-size:11px; background:#f1f5f9; padding:4px 10px; border-radius:12px; color:#64748b; font-weight:600;">0건</span>
+              </div>
+            </div>
+
+            <!-- 이력 조건 검색 필터 바 -->
+            <div class="history-filter-box">
+              <div class="filter-row">
+                <select id="historyPeriodType" class="select-box" style="padding:7px 10px; font-size:12px;" onchange="onHistoryFilterChange()">
+                  <option value="daily">일단위 조회</option>
+                  <option value="monthly">월단위 조회</option>
+                  <option value="all">전체 기간</option>
+                </select>
+                <input type="date" id="historyDateInput" class="input-text" style="padding:7px 10px; font-size:12px;" onchange="renderStudentHistory()">
+                <input type="month" id="historyMonthInput" class="input-text hidden" style="padding:7px 10px; font-size:12px;" onchange="renderStudentHistory()">
+              </div>
+
+              <div class="filter-row">
+                <select id="historyScopeType" class="select-box" style="padding:7px 10px; font-size:12px;" onchange="onHistoryFilterChange()">
+                  <option value="individual">선택한 학생 개인</option>
+                  <option value="class">선택한 학급 전체</option>
+                  <option value="all">전체 학생</option>
+                </select>
+              </div>
+            </div>
+
+            <div id="studentHistoryList" class="history-list">
+              <div style="text-align:center; padding:50px 0; color:#94a3b8; font-size:13px;">
+                지도 이력이 표출됩니다.
+              </div>
+            </div>
+          </div>
+          
+          <div id="studentDetailFooter" class="hidden" style="margin-top:20px; padding-top:14px; border-top:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center; font-size:12px;">
+            <span>조회된 기록 총 <strong id="studentTotalCount" style="color:#4338ca;">0</strong>회</span>
+            <button id="btnDeleteSelectedRecs" class="btn btn-rose admin-only hidden" style="padding:6px 12px; font-size:11px;" onclick="deleteSelectedRecords()">선택 항목 삭제 (<span id="selectedRecCount">0</span>건)</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: 월별 및 년도별 학급 통계 -->
+    <div id="tabStats" class="hidden">
+      <!-- 1. 월별 통계 영역 -->
+      <div style="margin-bottom:32px;">
+        <div class="panel" style="margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <label style="font-size:14px; font-weight:bold; color:#4338ca;">📅 월별 학급 통계</label>
+            <input type="month" id="statsMonthPicker" class="input-text" style="width:auto; padding:6px 12px;" onchange="renderStats()">
+          </div>
+          <button class="btn btn-emerald" onclick="exportMonthlyExcel()">선택 월 통계 엑셀 다운로드 (다중시트)</button>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-bottom:16px;">
+          <div class="panel">
+            <div class="panel-title">월별 항목별 위반 현황</div>
+            <div id="catChartContainer" class="bar-chart-container"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-title">월별 학급별 위반 현황</div>
+            <div id="classChartContainer" class="bar-chart-container"></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title" style="justify-content:space-between;">
+            <span>월별 개인별 현황 (위반 1회 이상 학생만 표시)</span>
+            <span id="filteredStudentCountBadge" style="font-size:12px; background:#e0e7ff; color:#4338ca; padding:3px 10px; border-radius:12px; font-weight:600;">0명</span>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>학번</th>
+                  <th>이름</th>
+                  <th>총 위반 횟수</th>
+                  <th>성찰문 제출 횟수</th>
+                  <th>성찰문 제출율</th>
+                  <th>주요 위반 항목</th>
+                </tr>
+              </thead>
+              <tbody id="statsStudentTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. 년도별 통계 영역 -->
+      <div style="border-top:2px dashed #cbd5e1; padding-top:24px;">
+        <div class="panel" style="margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <label style="font-size:14px; font-weight:bold; color:#4338ca;">🏢 년도별 학급 통계</label>
+            <select id="statsYearPicker" class="select-box" style="width:auto; padding:6px 12px;" onchange="renderYearlyStats()"></select>
+          </div>
+          <button class="btn btn-indigo" onclick="exportYearlyExcel()">선택 년도 통계 엑셀 다운로드 (다중시트)</button>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-bottom:16px;">
+          <div class="panel">
+            <div class="panel-title">년도별 항목별 총 위반 현황</div>
+            <div id="yearlyCatChartContainer" class="bar-chart-container"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-title">년도별 학급별 총 위반 현황</div>
+            <div id="yearlyClassChartContainer" class="bar-chart-container"></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title" style="justify-content:space-between;">
+            <span>년도별 개인별 현황 (해당 연도 위반 학생만 표시)</span>
+            <span id="yearlyStudentCountBadge" style="font-size:12px; background:#e0e7ff; color:#4338ca; padding:3px 10px; border-radius:12px; font-weight:600;">0명</span>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>학번</th>
+                  <th>이름</th>
+                  <th>연간 위반 횟수</th>
+                  <th>성찰문 제출 횟수</th>
+                  <th>성찰문 제출율</th>
+                  <th>주요 위반 항목</th>
+                </tr>
+              </thead>
+              <tbody id="yearlyStudentTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- 학생 일괄 등록 모달 (관리자전용) -->
+  <div id="batchModal" class="modal-backdrop hidden">
+    <div class="modal-box">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h3 style="font-size:16px; font-weight:bold;">학생 명단 일괄 누적 등록 (관리자전용)</h3>
+        <button onclick="closeBatchModal()" style="border:none; background:none; font-size:20px; cursor:pointer; color:#64748b;">&times;</button>
+      </div>
+      <div style="padding:10px 14px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; font-size:12px; color:#1e40af; margin-bottom:14px; line-height:1.5;">
+        📌 <strong>등록 안내:</strong> 기존 명단과 지도 기록은 그대로 유지되며, 업로드하신 명단 중 <strong>새로운 학번만 골라서 누적 추가</strong>됩니다. (중복 학번은 제외)
+      </div>
+      <div style="margin-bottom:14px;">
+        <button class="btn btn-indigo" style="width:100%; margin-bottom:8px; padding:10px;" onclick="downloadSampleCSV()">양식 CSV 다운로드</button>
+        <input type="file" id="csvFileInput" accept=".csv, .txt" style="display:none;" onchange="handleFileUpload(event)">
+        <button class="btn" style="width:100%; background:#f1f5f9; color:#334155; padding:10px; border:1px solid #cbd5e1;" onclick="document.getElementById('csvFileInput').click()">CSV 파일 선택 업로드</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">또는 텍스트 직접 붙여넣기 (학번, 이름)</label>
+        <textarea id="batchInputText" rows="6" class="input-text" placeholder="10501, 강해린&#10;10502, 김민지&#10;10503, 팜하니"></textarea>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:8px;">
+        <button class="btn" style="background:#e2e8f0; color:#334155;" onclick="closeBatchModal()">취소</button>
+        <button class="btn btn-indigo" onclick="processBatchRegister()">신규 학생 누적 등록 실행</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 위반 항목 관리 모달 (관리자 전용) -->
+  <div id="violationConfigModal" class="modal-backdrop hidden">
+    <div class="modal-box" style="max-width:500px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h3 style="font-size:16px; font-weight:bold;">위반 항목 추가 및 삭제 (관리자전용)</h3>
+        <button onclick="closeViolationConfigModal()" style="border:none; background:none; font-size:20px; cursor:pointer; color:#64748b;">&times;</button>
+      </div>
+
+      <div style="padding:10px 14px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; font-size:12px; color:#1e40af; margin-bottom:14px; line-height:1.5;">
+        💡 시스템에서 사용할 위반 항목(버튼 종류)을 자유롭게 추가하거나 삭제할 수 있습니다.
+      </div>
+
+      <!-- 항목 추가 폼 -->
+      <div style="display:flex; gap:8px; margin-bottom:16px;">
+        <input type="text" id="newViolationInput" class="input-text" placeholder="추가할 위반 항목 이름 (예: 지각, 폰사용 등)">
+        <button class="btn btn-indigo" style="white-space:nowrap;" onclick="addViolationCategory()">항목 추가</button>
+      </div>
+
+      <div style="font-size:13px; font-weight:bold; margin-bottom:8px; color:#334155;">현재 등록된 위반 항목 목록</div>
+      <div class="table-container" style="max-height:220px; overflow-y:auto; margin-bottom:16px;">
+        <table>
+          <thead>
+            <tr>
+              <th>항목 이름</th>
+              <th style="width:70px; text-align:center;">관리</th>
+            </tr>
+          </thead>
+          <tbody id="violationConfigTableBody"></tbody>
+        </table>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end;">
+        <button class="btn btn-slate" onclick="closeViolationConfigModal()">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 학생 명단 관리 및 일괄 삭제 모달 (관리자 전용) -->
+  <div id="studentManageModal" class="modal-backdrop hidden">
+    <div class="modal-box" style="max-width:650px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h3 style="font-size:16px; font-weight:bold;">학생 명단 관리 및 삭제 (관리자전용)</h3>
+        <button onclick="closeStudentManageModal()" style="border:none; background:none; font-size:20px; cursor:pointer; color:#64748b;">&times;</button>
+      </div>
+
+      <div style="padding:10px 14px; background:#fff1f2; border:1px solid #fecdd3; border-radius:10px; font-size:12px; color:#9f1239; margin-bottom:14px; line-height:1.5;">
+        ⚠️ <strong>경고:</strong> 학생을 삭제할 경우, 해당 학생의 <strong>모든 위반 지도 기록 및 성찰문 이력도 함께 영구 삭제</strong>됩니다.
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <label style="font-size:12px; font-weight:bold; display:flex; align-items:center; gap:6px; cursor:pointer;">
+          <input type="checkbox" id="selectAllStudentsCheckbox" style="accent-color:#4338ca;" onchange="toggleSelectAllStudents(this.checked)"> 전체 학생 선택
+        </label>
+        <button class="btn btn-rose" style="font-size:11px; padding:6px 12px;" onclick="deleteSelectedStudents()">선택한 학생 일괄 삭제 (<span id="selectedStudentCount">0</span>명)</button>
+      </div>
+
+      <div class="table-container" style="max-height:280px; overflow-y:auto; margin-bottom:16px;">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:40px;">선택</th>
+              <th>학번</th>
+              <th>이름</th>
+              <th>누적 위반건수</th>
+              <th>관리</th>
+            </tr>
+          </thead>
+          <tbody id="studentManageTableBody"></tbody>
+        </table>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end;">
+        <button class="btn btn-slate" onclick="closeStudentManageModal()">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 교사 계정 관리 및 일괄 삭제 모달 (관리자 전용) -->
+  <div id="teacherModal" class="modal-backdrop hidden">
+    <div class="modal-box" style="max-width:650px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h3 style="font-size:16px; font-weight:bold;">교사 계정 관리 및 삭제</h3>
+        <button onclick="closeTeacherModal()" style="border:none; background:none; font-size:20px; cursor:pointer; color:#64748b;">&times;</button>
+      </div>
+
+      <!-- 교사 일괄 등록 영역 -->
+      <div style="margin-bottom:20px; padding:14px; background:#eeeffe; border:1px solid #c7d2fe; border-radius:12px;">
+        <div style="font-size:13px; font-weight:bold; color:#4338ca; margin-bottom:8px;">📁 교사 계정 일괄 누적 등록</div>
+        <div style="display:flex; gap:8px; margin-bottom:8px;">
+          <button class="btn btn-indigo" style="flex:1; font-size:11px; padding:8px;" onclick="downloadTeacherSampleCSV()">교사 등록 양식 CSV 다운로드</button>
+          <input type="file" id="teacherCsvFileInput" accept=".csv, .txt" style="display:none;" onchange="handleTeacherFileUpload(event)">
+          <button class="btn" style="flex:1; font-size:11px; background:white; border:1px solid #cbd5e1; padding:8px;" onclick="document.getElementById('teacherCsvFileInput').click()">CSV 파일 선택 업로드</button>
+        </div>
+        <div class="form-group" style="margin-bottom:8px;">
+          <label class="form-label">텍스트 직접 붙여넣기 (아이디, 비밀번호, 이름, 권한, 담당학급)</label>
+          <textarea id="batchTeacherInputText" rows="2" class="input-text" style="font-size:12px;" placeholder="teacher2, 1234, 박교사, teacher, 106"></textarea>
+        </div>
+        <button class="btn btn-indigo" style="width:100%; font-size:12px; padding:10px;" onclick="processBatchTeacherRegister()">신규 교사 누적 등록 실행</button>
+      </div>
+
+      <!-- 개별 교사 등록 폼 -->
+      <form onsubmit="handleAddTeacher(event)" style="margin-bottom:20px; padding:14px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px;">
+        <div style="font-size:13px; font-weight:bold; margin-bottom:8px; color:#1e293b;">새 교사 계정 개별 추가</div>
+        <div class="grid-2" style="margin-bottom:8px;">
+          <input type="text" id="newTeacherId" class="input-text" placeholder="아이디" required>
+          <input type="password" id="newTeacherPw" class="input-text" placeholder="비밀번호" required>
+        </div>
+        <div class="grid-2" style="margin-bottom:8px;">
+          <input type="text" id="newTeacherName" class="input-text" placeholder="교사 이름 (예: 김교사)" required>
+          <select id="newTeacherRole" class="select-box">
+            <option value="teacher">일반 교사</option>
+            <option value="admin">관리자</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:10px;">
+          <input type="text" id="newTeacherClass" class="input-text" placeholder="담당 학급 (예: 105) - 비담임일 경우 빈칸으로 유지">
+        </div>
+        <button type="submit" class="btn btn-emerald" style="width:100%; padding:10px;">개별 교사 계정 추가</button>
+      </form>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <label style="font-size:12px; font-weight:bold; display:flex; align-items:center; gap:6px; cursor:pointer;">
+          <input type="checkbox" id="selectAllTeachersCheckbox" style="accent-color:#4338ca;" onchange="toggleSelectAllTeachers(this.checked)"> 전체 교사 선택
+        </label>
+        <button class="btn btn-rose" style="font-size:11px; padding:6px 12px;" onclick="deleteSelectedTeachers()">선택한 교사 일괄 삭제 (<span id="selectedTeacherCount">0</span>명)</button>
+      </div>
+
+      <div class="table-container" style="max-height:160px; overflow-y:auto; margin-bottom:20px;">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:40px;">선택</th>
+              <th>ID</th>
+              <th>이름</th>
+              <th>권한</th>
+              <th>담당학급</th>
+              <th>관리</th>
+            </tr>
+          </thead>
+          <tbody id="teacherTableBody"></tbody>
+        </table>
+      </div>
+
+      <!-- 학년도 마감 및 신학년도 전환 영역 (관리자 전용) -->
+      <div style="padding:14px; background:#fff1f2; border:1px solid #fecdd3; border-radius:12px;">
+        <div style="font-size:13px; font-weight:bold; color:#e11d48; margin-bottom:4px;">🔒 학년도 마감 및 새 학년도 시작</div>
+        <p style="font-size:11px; color:#9f1239; margin-bottom:12px; line-height:1.4;">
+          현재 학년도의 데이터(학생/일반교사 명단 및 지도기록)를 과거 보관소로 저장하고, **관리자 계정만 남긴 채 새 학년도로 깨끗하게 초기화**합니다.
+        </p>
+        <button type="button" class="btn btn-rose" style="width:100%; font-size:12px; padding:10px;" onclick="closeAndStartNewYear()">현 학년도 마감 및 새 학년도 초기화 실행</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 교사 직접 비밀번호 변경 모달 (실명 인증 포함) -->
+  <div id="changePwModal" class="modal-backdrop hidden">
+    <div class="modal-box" style="max-width:400px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h3 style="font-size:16px; font-weight:bold;">비밀번호 변경 (실명 확인)</h3>
+        <button onclick="closeChangePwModal()" style="border:none; background:none; font-size:20px; cursor:pointer; color:#64748b;">&times;</button>
+      </div>
+
+      <form onsubmit="handleChangePassword(event)">
+        <div class="form-group">
+          <label class="form-label">아이디 (ID)</label>
+          <input type="text" id="changePwUserId" class="input-text" style="background:#e2e8f0;" readonly>
+        </div>
+        <div class="form-group">
+          <label class="form-label">실명 확인 (등록된 성함 입력)</label>
+          <input type="text" id="changePwUserNameConfirm" class="input-text" placeholder="본인 성함 입력" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">현재 비밀번호</label>
+          <input type="password" id="changePwCurrentPw" class="input-text" placeholder="현재 비밀번호 입력" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">새로운 비밀번호</label>
+          <input type="password" id="changePwNewPw" class="input-text" placeholder="변경할 새 비밀번호" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">새로운 비밀번호 확인</label>
+          <input type="password" id="changePwNewPwConfirm" class="input-text" placeholder="새 비밀번호 다시 입력" required>
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:8px;">
+          <button type="button" class="btn" style="background:#e2e8f0; color:#334155;" onclick="closeChangePwModal()">취소</button>
+          <button type="submit" class="btn btn-indigo">비밀번호 변경 실행</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // 대한민국 표준시(KST, UTC+9) 기준 오늘 날짜 문자열(YYYY-MM-DD)을 정확히 반환하는 유틸리티 함수
+    function getKSTDateString(dateObj = new Date()) {
+      const utc = dateObj.getTime() + (dateObj.getTimezoneOffset() * 60000);
+      const kstTime = new Date(utc + (9 * 3600000));
+      const year = kstTime.getFullYear();
+      const month = String(kstTime.getMonth() + 1).padStart(2, '0');
+      const day = String(kstTime.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    // 대한민국 표준시(KST) 기준 오늘 연도(YYYY) 반환
+    function getKSTYear(dateObj = new Date()) {
+      const utc = dateObj.getTime() + (dateObj.getTimezoneOffset() * 60000);
+      const kstTime = new Date(utc + (9 * 3600000));
+      return kstTime.getFullYear();
+    }
+
+    // 대한민국 표준시(KST) 기준 오늘 월(YYYY-MM) 반환
+    function getKSTMonthString(dateObj = new Date()) {
+      const utc = dateObj.getTime() + (dateObj.getTimezoneOffset() * 60000);
+      const kstTime = new Date(utc + (9 * 3600000));
+      const year = kstTime.getFullYear();
+      const month = String(kstTime.getMonth() + 1).padStart(2, '0');
+      return `${year}-${month}`;
+    }
+
+    let currentOperatingYear = getKSTYear(); 
+    let selectedViewingYear = currentOperatingYear;     
+    let isReadOnlyArchive = false;                        
+
+    let currentUser = null; 
+    let teachers = [];     
+    let students = [];     
+    let records = [];      
+    let archives = {};     
+    let violationCategories = ['복장', '화장', '액세서리', '두발(퍼머,염색)', '기타']; // 관리자 설정 가능 항목
+
+    let selectedStudentId = null;
+    let selectedViolations = new Set(); // 다중 선택을 위한 Set 객체
+    let isManualDateChanged = false; // 수동 변경 여부 체크
+    
+    let currentlyFilteredRecords = [];
+    let selectedRecordIds = new Set();
+    let selectedStudentIds = new Set();
+    let selectedTeacherIds = new Set();
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const thisMonth = getKSTMonthString();
+
+      setTodayToViolationDate(); // KST 기준 오늘 날짜 자동 설정
+
+      document.getElementById('historyDateInput').value = document.getElementById('violationDate').value;
+      document.getElementById('historyMonthInput').value = thisMonth;
+      document.getElementById('statsMonthPicker').value = thisMonth;
+      
+      loadSystemData();
+      updateYearSelectDropdown();
+      initYearPicker();
+      checkAuthSession();
+      renderViolationButtons();
+    });
+
+    function setTodayToViolationDate() {
+      const todayKST = getKSTDateString();
+      const dateInput = document.getElementById('violationDate');
+      if (dateInput) {
+        dateInput.value = todayKST;
+        isManualDateChanged = false;
+      }
+    }
+
+    function loadSystemData() {
+      const savedYear = localStorage.getItem('sr_operating_year');
+      if (savedYear) currentOperatingYear = parseInt(savedYear);
+      selectedViewingYear = currentOperatingYear;
+
+      const savedArchives = localStorage.getItem('sr_archives');
+      if (savedArchives) archives = JSON.parse(savedArchives);
+
+      const savedCategories = localStorage.getItem('sr_violation_categories');
+      if (savedCategories) violationCategories = JSON.parse(savedCategories);
+
+      loadYearData(currentOperatingYear);
+    }
+
+    function loadYearData(year) {
+      if (year === currentOperatingYear) {
+        isReadOnlyArchive = false;
+        const savedTeachers = localStorage.getItem('sr_teachers');
+        const savedStudents = localStorage.getItem('sr_students');
+        const savedRecords = localStorage.getItem('sr_records');
+
+        if (savedTeachers) {
+          teachers = JSON.parse(savedTeachers);
+          teachers.forEach(t => { if (t.id === 'admin') t.id = '관리자'; });
+        } else {
+          teachers = [
+            { id: '관리자', pw: '1234', name: '관리자', role: 'admin', assignedClass: '' },
+            { id: 'teacher1', pw: '1234', name: '김담임', role: 'teacher', assignedClass: '105' },
+            { id: 'sub_teacher', pw: '1234', name: '이교사', role: 'teacher', assignedClass: '' }
+          ];
+          saveTeachers();
+        }
+
+        if (!teachers.some(t => t.role === 'admin')) {
+          teachers.unshift({ id: '관리자', pw: '1234', name: '관리자', role: 'admin', assignedClass: '' });
+          saveTeachers();
+        }
+
+        students = savedStudents ? JSON.parse(savedStudents) : [];
+        records = savedRecords ? JSON.parse(savedRecords) : [];
+      } else {
+        isReadOnlyArchive = true;
+        const archData = archives[year] || { students: [], teachers: [], records: [] };
+        students = archData.students || [];
+        teachers = archData.teachers || [{ id: '관리자', pw: '1234', name: '관리자', role: 'admin', assignedClass: '' }];
+        teachers.forEach(t => { if (t.id === 'admin') t.id = '관리자'; });
+        records = archData.records || [];
+      }
+    }
+
+    function saveTeachers() { 
+      if (!isReadOnlyArchive) localStorage.setItem('sr_teachers', JSON.stringify(teachers)); 
+    }
+    
+    function saveData() {
+      if (!isReadOnlyArchive) {
+        localStorage.setItem('sr_students', JSON.stringify(students));
+        localStorage.setItem('sr_records', JSON.stringify(records));
+        localStorage.setItem('sr_violation_categories', JSON.stringify(violationCategories));
+      }
+      renderAll();
+    }
+
+    // 매일 자정이나 백그라운드에서 수동 변경이 없었다면 위반 날짜를 KST 기준 오늘 날짜로 자동 갱신
+    setInterval(() => {
+      if (!isManualDateChanged) {
+        setTodayToViolationDate();
+      }
+    }, 60000);
+
+    function onManualDateChange() {
+      isManualDateChanged = true;
+    }
+
+    function updateYearSelectDropdown() {
+      const select = document.getElementById('operatingYearSelect');
+      select.innerHTML = '';
+      
+      const allYears = new Set([currentOperatingYear, ...Object.keys(archives).map(Number)]);
+      const sortedYears = Array.from(allYears).sort((a,b) => b - a);
+
+      sortedYears.forEach(y => {
+        const opt = document.createElement('option');
+        opt.value = y;
+        opt.textContent = (y === currentOperatingYear) ? `${y}년도 (현재 운영중)` : `${y}년도 (보관됨)`;
+        select.appendChild(opt);
+      });
+
+      select.value = selectedViewingYear;
+    }
+
+    function onOperatingYearChange() {
+      const year = parseInt(document.getElementById('operatingYearSelect').value);
+      selectedViewingYear = year;
+      loadYearData(year);
+
+      const notice = document.getElementById('archiveNoticeBanner');
+      const submitBtn = document.getElementById('btnSubmitViolation');
+
+      if (isReadOnlyArchive) {
+        notice.classList.remove('hidden');
+        document.getElementById('noticeYearText').textContent = year;
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = '0.5';
+        submitBtn.textContent = '보관 데이터 조회 중 (등록 불가)';
+      } else {
+        notice.classList.add('hidden');
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = '1.0';
+        submitBtn.textContent = '위반사항 등록 확인';
+      }
+
+      selectedStudentId = null;
+      selectedRecordIds.clear();
+      renderAll();
+    }
+
+    function resetToCurrentYear() {
+      selectedViewingYear = currentOperatingYear;
+      document.getElementById('operatingYearSelect').value = currentOperatingYear;
+      onOperatingYearChange();
+    }
+
+    function closeAndStartNewYear() {
+      if (!currentUser || currentUser.role !== 'admin') return;
+
+      const nextYear = currentOperatingYear + 1;
+      const confirmMsg = `정말로 [${currentOperatingYear} 학년도]를 마감하고 [${nextYear} 학년도]를 시작하시겠습니까?\n\n` +
+        `• 현재 학생/교사/지도 데이터는 ${currentOperatingYear}년도 보관소로 백업됩니다.\n` +
+        `• 관리자 계정을 제외한 학생 및 교사 목록이 전부 초기화됩니다.`;
+
+      if (confirm(confirmMsg)) {
+        archives[currentOperatingYear] = {
+          students: [...students],
+          teachers: [...teachers],
+          records: [...records]
+        };
+        localStorage.setItem('sr_archives', JSON.stringify(archives));
+
+        currentOperatingYear = nextYear;
+        selectedViewingYear = nextYear;
+        localStorage.setItem('sr_operating_year', currentOperatingYear);
+
+        students = [];
+        records = [];
+        teachers = teachers.filter(t => t.role === 'admin');
+
+        saveTeachers();
+        saveData();
+
+        updateYearSelectDropdown();
+        closeTeacherModal();
+        alert(`🎉 ${currentOperatingYear} 학년도가 시작되었습니다!\n새로운 학생 및 교사를 등록해 주세요.`);
+        resetToCurrentYear();
+      }
+    }
+
+    function initYearPicker() {
+      const picker = document.getElementById('statsYearPicker');
+      const currentYear = getKSTYear();
+      picker.innerHTML = '';
+      for (let y = currentYear; y >= currentYear - 4; y--) {
+        const opt = document.createElement('option');
+        opt.value = y;
+        opt.textContent = `${y}년도`;
+        picker.appendChild(opt);
+      }
+    }
+
+    function checkAuthSession() {
+      const savedUser = localStorage.getItem('sr_current_user') || sessionStorage.getItem('sr_current_user');
+      if (savedUser) {
+        currentUser = JSON.parse(savedUser);
+        if (currentUser.id === 'admin') currentUser.id = '관리자';
+        document.getElementById('loginOverlay').classList.add('hidden');
+        applyUserPermissions();
+        setTodayToViolationDate();
+        renderAll();
+      } else {
+        document.getElementById('loginOverlay').classList.remove('hidden');
+      }
+    }
+
+    function handleLogin(e) {
+      e.preventDefault();
+      const id = document.getElementById('loginId').value.trim();
+      const pw = document.getElementById('loginPw').value.trim();
+      const keepLoggedIn = document.getElementById('keepLoggedIn').checked;
+
+      const user = teachers.find(t => t.id === id && t.pw === pw);
+      if (user) {
+        currentUser = user;
+        const userStr = JSON.stringify(currentUser);
+        
+        if (keepLoggedIn) {
+          localStorage.setItem('sr_current_user', userStr);
+          sessionStorage.removeItem('sr_current_user');
+        } else {
+          sessionStorage.setItem('sr_current_user', userStr);
+          localStorage.removeItem('sr_current_user');
+        }
+
+        document.getElementById('loginOverlay').classList.add('hidden');
+        applyUserPermissions();
+        setTodayToViolationDate();
+        renderAll();
+      } else {
+        alert('아이디 또는 비밀번호가 올바르지 않습니다.');
+      }
+    }
+
+    function handleLogout() {
+      sessionStorage.removeItem('sr_current_user');
+      localStorage.removeItem('sr_current_user');
+      currentUser = null;
+      location.reload();
+    }
+
+    function applyUserPermissions() {
+      if (!currentUser) return;
+
+      document.getElementById('headerUserInfo').classList.remove('hidden');
+      document.getElementById('userNameDisplay').textContent = `${currentUser.name} 선생님`;
+
+      const roleBadge = document.getElementById('userRoleBadge');
+      if (currentUser.role === 'admin') {
+        roleBadge.textContent = '관리자';
+        roleBadge.className = 'user-badge badge-admin';
+        document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
+      } else {
+        if (currentUser.assignedClass) {
+          roleBadge.textContent = `담임교사 (${currentUser.assignedClass}반)`;
+          roleBadge.className = 'user-badge badge-teacher';
+        } else {
+          roleBadge.textContent = '비담임 교사';
+          roleBadge.className = 'user-badge badge-sub';
+        }
+        document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
+      }
+    }
+
+    function openChangePwModal() {
+      if (!currentUser) return;
+      document.getElementById('changePwUserId').value = currentUser.id;
+      document.getElementById('changePwUserNameConfirm').value = '';
+      document.getElementById('changePwCurrentPw').value = '';
+      document.getElementById('changePwNewPw').value = '';
+      document.getElementById('changePwNewPwConfirm').value = '';
+      document.getElementById('changePwModal').classList.remove('hidden');
+    }
+
+    function closeChangePwModal() {
+      document.getElementById('changePwModal').classList.add('hidden');
+    }
+
+    function handleChangePassword(e) {
+      e.preventDefault();
+      if (isReadOnlyArchive) { alert('과거 보관 데이터 조회 중에는 비밀번호를 변경할 수 없습니다.'); return; }
+
+      const nameConfirm = document.getElementById('changePwUserNameConfirm').value.trim();
+      const currentPw = document.getElementById('changePwCurrentPw').value.trim();
+      const newPw = document.getElementById('changePwNewPw').value.trim();
+      const newPwConfirm = document.getElementById('changePwNewPwConfirm').value.trim();
+
+      if (nameConfirm !== currentUser.name) { alert('입력하신 실명이 계정에 등록된 성함과 일치하지 않습니다.'); return; }
+      if (currentPw !== currentUser.pw) { alert('현재 비밀번호가 올바르지 않습니다.'); return; }
+      if (newPw !== newPwConfirm) { alert('새로운 비밀번호가 서로 일치하지 않습니다.'); return; }
+      if (newPw.length < 4) { alert('비밀번호는 최소 4자리 이상이어야 합니다.'); return; }
+
+      const teacherObj = teachers.find(t => t.id === currentUser.id);
+      if (teacherObj) {
+        teacherObj.pw = newPw;
+        currentUser.pw = newPw;
+        saveTeachers();
+        
+        const userStr = JSON.stringify(currentUser);
+        if (localStorage.getItem('sr_current_user')) {
+          localStorage.setItem('sr_current_user', userStr);
+        } else {
+          sessionStorage.setItem('sr_current_user', userStr);
+        }
+
+        alert('비밀번호가 성공적으로 변경되었습니다.');
+        closeChangePwModal();
+      }
+    }
+
+    function renderAll() {
+      updateSummaryCards();
+      renderClassGroupOptions();
+      updateSelectedStudentUI();
+      renderStudentHistory();
+      renderViolationButtons();
+      if (!document.getElementById('tabStats').classList.contains('hidden')) {
+        renderStats();
+        renderYearlyStats();
+      }
+    }
+
+    function switchTab(tab) {
+      if (tab === 'record') {
+        document.getElementById('tabRecord').classList.remove('hidden');
+        document.getElementById('tabStats').classList.add('hidden');
+        document.getElementById('btnTab1').classList.add('active');
+        document.getElementById('btnTab2').classList.remove('active');
+      } else {
+        document.getElementById('tabRecord').classList.add('hidden');
+        document.getElementById('tabStats').classList.remove('hidden');
+        document.getElementById('btnTab2').classList.add('active');
+        document.getElementById('btnTab1').classList.remove('active');
+        renderStats();
+        renderYearlyStats();
+      }
+    }
+
+    function renderViolationButtons() {
+      const container = document.getElementById('violationButtonsContainer');
+      if (!container) return;
+
+      container.innerHTML = violationCategories.map(cat => `
+        <button type="button" class="btn-viol ${selectedViolations.has(cat) ? 'selected' : ''}" onclick="toggleViolationCategory('${cat}')">
+          ${cat}
+        </button>
+      `).join('');
+    }
+
+    function renderClassGroupOptions() {
+      const classSelect = document.getElementById('classGroupSelect');
+      const current = classSelect.value;
+      const groups = [...new Set(students.map(s => s.id.substring(0, s.id.length - 2)))].sort();
+
+      classSelect.innerHTML = '<option value="">학년·반 선택...</option>';
+      groups.forEach(g => {
+        const opt = document.createElement('option');
+        opt.value = g;
+        opt.textContent = `${g} (${g.substring(0,1)}학년 ${parseInt(g.substring(1))}반)`;
+        classSelect.appendChild(opt);
+      });
+      if (current && groups.includes(current)) classSelect.value = current;
+    }
+
+    function onClassGroupChange() {
+      const g = document.getElementById('classGroupSelect').value;
+      const numSelect = document.getElementById('numberSelect');
+      numSelect.innerHTML = '<option value="">번호 선택...</option>';
+
+      if (!g) { numSelect.disabled = true; return; }
+      const filtered = students.filter(s => s.id.startsWith(g)).sort((a,b) => a.id.localeCompare(b.id));
+      filtered.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.id;
+        opt.textContent = `${s.id.substring(s.id.length - 2)}번 (${s.name})`;
+        numSelect.appendChild(opt);
+      });
+      numSelect.disabled = false;
+      renderStudentHistory();
+    }
+
+    function onNumberChange() {
+      const id = document.getElementById('numberSelect').value;
+      if (id) selectStudent(id);
+    }
+
+    function onSearchInput() {
+      const q = document.getElementById('studentSearchInput').value.trim().toLowerCase();
+      if (!q) return;
+      const match = students.find(s => s.id.toLowerCase().includes(q) || s.name.toLowerCase().includes(q));
+      if (match) selectStudent(match.id, false);
+    }
+
+    function selectStudent(id, updateInput = true) {
+      selectedStudentId = id;
+      const student = students.find(s => s.id === id);
+      if (!student) return;
+
+      const groupVal = student.id.substring(0, student.id.length - 2);
+      const classSelect = document.getElementById('classGroupSelect');
+      if (classSelect.value !== groupVal) {
+        classSelect.value = groupVal;
+        onClassGroupChange();
+      }
+      document.getElementById('numberSelect').value = student.id;
+      if (updateInput) document.getElementById('studentSearchInput').value = student.id;
+
+      updateSelectedStudentUI();
+      renderStudentHistory();
+    }
+
+    function updateSelectedStudentUI() {
+      const banner = document.getElementById('selectedStudentBanner');
+      if (!selectedStudentId) { banner.classList.add('hidden'); return; }
+      const s = students.find(st => st.id === selectedStudentId);
+      if (s) {
+        banner.classList.remove('hidden');
+        document.getElementById('bannerStudentId').textContent = s.id;
+        document.getElementById('bannerStudentName').textContent = s.name;
+        const pending = records.filter(r => r.studentId === s.id && !r.reflectionSubmitted).length;
+        const badge = document.getElementById('bannerPendingBadge');
+        if (pending > 0) { badge.textContent = `미제출 ${pending}건`; badge.classList.remove('hidden'); }
+        else badge.classList.add('hidden');
+      }
+    }
+
+    function toggleViolationCategory(type) {
+      if (selectedViolations.has(type)) {
+        selectedViolations.delete(type);
+      } else {
+        selectedViolations.add(type);
+      }
+      renderViolationButtons();
+    }
+
+    function confirmAndRecordViolation() {
+      if (isReadOnlyArchive) { alert('과거 보관 데이터 조회 중에는 새로 입력할 수 없습니다.'); return; }
+      if (!selectedStudentId) { alert('학생을 먼저 선택해 주세요.'); return; }
+      if (selectedViolations.size === 0) { alert('위반 항목을 1개 이상 선택해 주세요.'); return; }
+
+      const date = document.getElementById('violationDate').value;
+      const noteInput = document.getElementById('violationNote');
+      const note = noteInput.value.trim();
+      const direct = document.getElementById('reflectionSubmittedDirectly').checked;
+
+      if (selectedViolations.has('기타') && !note) { 
+        alert("'기타' 항목 선택 시 세부 사유를 입력하세요."); 
+        noteInput.focus(); 
+        return; 
+      }
+
+      const nowString = new Date().toLocaleString('ko-KR', {
+        timeZone: 'Asia/Seoul',
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit'
+      });
+
+      const violationTypes = Array.from(selectedViolations);
+      violationTypes.forEach((vType, index) => {
+        records.unshift({
+          id: 'rec_' + Date.now() + '_' + index,
+          studentId: selectedStudentId,
+          date: date,
+          type: vType,
+          note: note,
+          reflectionSubmitted: direct,
+          teacherName: currentUser ? currentUser.name : '알 수 없음',
+          createdAt: nowString
+        });
+      });
+
+      selectedViolations.clear();
+      renderViolationButtons();
+      noteInput.value = '';
+      document.getElementById('reflectionSubmittedDirectly').checked = false;
+      setTodayToViolationDate();
+
+      alert(`선택한 위반 항목 ${violationTypes.length}건이 각각 독립된 개별 건으로 정상 등록되었습니다.`);
+      saveData();
+    }
+
+    function onHistoryFilterChange() {
+      const periodType = document.getElementById('historyPeriodType').value;
+      const dateInput = document.getElementById('historyDateInput');
+      const monthInput = document.getElementById('historyMonthInput');
+
+      if (periodType === 'daily') {
+        dateInput.classList.remove('hidden');
+        monthInput.classList.add('hidden');
+      } else if (periodType === 'monthly') {
+        dateInput.classList.add('hidden');
+        monthInput.classList.remove('hidden');
+      } else {
+        dateInput.classList.add('hidden');
+        monthInput.classList.add('hidden');
+      }
+      selectedRecordIds.clear();
+      renderStudentHistory();
+    }
+
+    function toggleReflection(id) {
+      if (isReadOnlyArchive) { alert('과거 보관 데이터는 수정할 수 없습니다.'); return; }
+      const rec = records.find(r => r.id === id);
+      if (!rec) return;
+
+      const studentClass = rec.studentId.substring(0, rec.studentId.length - 2);
+
+      if (currentUser.role !== 'admin') {
+        if (!currentUser.assignedClass) {
+          alert('비담임 교사는 성찰문 제출 여부를 체크할 수 없습니다.');
+          return;
+        }
+        if (currentUser.assignedClass !== studentClass) {
+          alert(`권한이 없습니다. (${studentClass}반 담임교사만 체크 가능)`);
+          return;
+        }
+      }
+
+      rec.reflectionSubmitted = !rec.reflectionSubmitted;
+      saveData();
+    }
+
+    function deleteRecord(id) {
+      if (isReadOnlyArchive) { alert('과거 보관 데이터는 삭제할 수 없습니다.'); return; }
+      if (!currentUser || currentUser.role !== 'admin') {
+        alert('삭제 권한이 없습니다. (관리자 계정만 삭제할 수 있습니다)');
+        return;
+      }
+      if (confirm('해당 지도 기록을 삭제하시겠습니까?')) {
+        records = records.filter(r => r.id !== id);
+        selectedRecordIds.delete(id);
+        saveData();
+      }
+    }
+
+    function toggleRecordSelection(id, checked) {
+      if (checked) selectedRecordIds.add(id);
+      else selectedRecordIds.delete(id);
+      updateSelectedCountUI();
+    }
+
+    function toggleSelectAll(checked) {
+      currentlyFilteredRecords.forEach(r => {
+        if (checked) selectedRecordIds.add(r.id);
+        else selectedRecordIds.delete(r.id);
+      });
+      document.querySelectorAll('.item-checkbox').forEach(cb => cb.checked = checked);
+      updateSelectedCountUI();
+    }
+
+    function updateSelectedCountUI() {
+      const cnt = selectedRecordIds.size;
+      document.getElementById('selectedRecCount').textContent = cnt;
+      const allCb = document.getElementById('selectAllCheckbox');
+      if (allCb && currentlyFilteredRecords.length > 0) {
+        allCb.checked = (currentlyFilteredRecords.every(r => selectedRecordIds.has(r.id)));
+      }
+    }
+
+    function deleteSelectedRecords() {
+      if (isReadOnlyArchive) { alert('과거 보관 데이터는 삭제할 수 없습니다.'); return; }
+      if (!currentUser || currentUser.role !== 'admin') {
+        alert('삭제 권한이 없습니다. (관리자 계정만 실행 가능합니다)');
+        return;
+      }
+      if (selectedRecordIds.size === 0) {
+        alert('삭제할 항목을 체크박스로 선택해 주세요.');
+        return;
+      }
+
+      if (confirm(`선택한 ${selectedRecordIds.size}건의 지도 기록을 정말로 삭제하시겠습니까?`)) {
+        records = records.filter(r => !selectedRecordIds.has(r.id));
+        selectedRecordIds.clear();
+        saveData();
+        alert('선택한 지도 기록이 모두 삭제되었습니다.');
+      }
+    }
+
+    function renderStudentHistory() {
+      const container = document.getElementById('studentHistoryList');
+      const badge = document.getElementById('recordCountBadge');
+      const footer = document.getElementById('studentDetailFooter');
+
+      const periodType = document.getElementById('historyPeriodType').value;
+      const scopeType = document.getElementById('historyScopeType').value;
+      const dateVal = document.getElementById('historyDateInput').value;
+      const monthVal = document.getElementById('historyMonthInput').value;
+      const selectedClassGroup = document.getElementById('classGroupSelect').value;
+
+      let filteredRecs = [...records];
+
+      if (periodType === 'daily' && dateVal) {
+        filteredRecs = filteredRecs.filter(r => r.date === dateVal);
+      } else if (periodType === 'monthly' && monthVal) {
+        filteredRecs = filteredRecs.filter(r => r.date.startsWith(monthVal));
+      }
+
+      if (scopeType === 'individual') {
+        if (!selectedStudentId) {
+          container.innerHTML = '<div style="text-align:center; padding:50px 0; color:#94a3b8; font-size:13px;">학생을 선택하시면 개인 누적 기록이 표출됩니다.</div>';
+          badge.textContent = '학생 선택 필요';
+          footer.classList.add('hidden');
+          currentlyFilteredRecords = [];
+          return;
+        }
+        filteredRecs = filteredRecs.filter(r => r.studentId === selectedStudentId);
+      } else if (scopeType === 'class') {
+        if (!selectedClassGroup) {
+          container.innerHTML = '<div style="text-align:center; padding:50px 0; color:#94a3b8; font-size:13px;">학년·반을 선택하시면 해당 학급 지도 기록이 표출됩니다.</div>';
+          badge.textContent = '학급 선택 필요';
+          footer.classList.add('hidden');
+          currentlyFilteredRecords = [];
+          return;
+        }
+        filteredRecs = filteredRecs.filter(r => r.studentId.startsWith(selectedClassGroup));
+      }
+
+      currentlyFilteredRecords = filteredRecs;
+
+      badge.textContent = `총 ${filteredRecs.length}건`;
+      footer.classList.remove('hidden');
+      document.getElementById('studentTotalCount').textContent = filteredRecs.length;
+
+      const isAdmin = (currentUser && currentUser.role === 'admin');
+      const btnBatchDel = document.getElementById('btnDeleteSelectedRecs');
+      
+      if (isAdmin && !isReadOnlyArchive && filteredRecs.length > 0) {
+        btnBatchDel.classList.remove('hidden');
+      } else {
+        btnBatchDel.classList.add('hidden');
+      }
+
+      updateSelectedCountUI();
+
+      if (filteredRecs.length === 0) {
+        container.innerHTML = '<div style="text-align:center; padding:40px 0; color:#94a3b8; font-size:13px;">조회 조건에 해당되는 지도 내역이 없습니다.</div>';
+        return;
+      }
+
+      container.innerHTML = filteredRecs.map(r => {
+        const student = students.find(s => s.id === r.studentId) || { name: '미등록' };
+        const studentClass = r.studentId.substring(0, r.studentId.length - 2);
+        const canEditReflection = !isReadOnlyArchive && (isAdmin || (currentUser.assignedClass && currentUser.assignedClass === studentClass));
+        const isChecked = selectedRecordIds.has(r.id);
+
+        let displayType = '';
+        if (Array.isArray(r.type)) {
+          displayType = r.type.join(', ');
+        } else {
+          displayType = r.type;
+        }
+
+        return `
+          <div class="history-item">
+            ${(isAdmin && !isReadOnlyArchive) ? `
+              <div style="padding-top:2px;">
+                <input type="checkbox" class="item-checkbox" style="accent-color:#4338ca;" ${isChecked ? 'checked' : ''} onchange="toggleRecordSelection('${r.id}', this.checked)">
+              </div>
+            ` : ''}
+            <div style="flex:1;">
+              <div class="history-head">
+                <div>
+                  <strong style="font-size:13px; color:#1e293b; margin-right:4px;">${student.name} (${r.studentId})</strong>
+                  <span class="history-type">${displayType}</span>
+                  <span class="history-date">위반일: ${r.date}</span>
+                </div>
+                ${(isAdmin && !isReadOnlyArchive) ? `<button onclick="deleteRecord('${r.id}')" style="border:none; background:none; color:#e11d48; font-weight:bold; font-size:16px; cursor:pointer;" title="개별삭제">&times;</button>` : ''}
+              </div>
+              ${r.note ? `<div style="font-size:12px; color:#475569; margin:4px 0;">${r.note}</div>` : ''}
+              
+              <div style="font-size:11px; color:#64748b; margin-top:4px; display:flex; justify-content:space-between; align-items:center;">
+                <span>📝 등록 교사: <strong>${r.teacherName || '시스템(기본)'}</strong></span>
+                <span>입력 시각: ${r.createdAt || r.date}</span>
+              </div>
+
+              <div style="text-align:right; margin-top:6px;">
+                <button class="btn-toggle-ref ${r.reflectionSubmitted ? 'ref-done' : 'ref-pending'} ${!canEditReflection ? 'ref-disabled' : ''}" 
+                        onclick="toggleReflection('${r.id}')">
+                  ${r.reflectionSubmitted ? '성찰문 제출완료' : '성찰문 미제출'}
+                  ${!canEditReflection ? ' (수정불가)' : ''}
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function updateSummaryCards() {
+      document.getElementById('statTotalStudents').textContent = `${students.length}명`;
+      document.getElementById('statTotalViolations').textContent = `${records.length}건`;
+      document.getElementById('statPendingReflections').textContent = `${records.filter(r => !r.reflectionSubmitted).length}건`;
+      const todayKST = getKSTDateString();
+      document.getElementById('statTodayViolations').textContent = `${records.filter(r => r.date === todayKST).length}건`;
+    }
+
+    function renderStats() {
+      const monthVal = document.getElementById('statsMonthPicker').value;
+      const filtered = records.filter(r => r.date.startsWith(monthVal));
+
+      const cats = violationCategories;
+      const maxCat = Math.max(...cats.map(c => filtered.filter(r => {
+        if (Array.isArray(r.type)) return r.type.includes(c);
+        return r.type === c;
+      }).length), 1);
+
+      document.getElementById('catChartContainer').innerHTML = cats.map(c => {
+        const cnt = filtered.filter(r => {
+          if (Array.isArray(r.type)) return r.type.includes(c);
+          return r.type === c;
+        }).length;
+        const pct = (cnt / maxCat) * 100;
+        return `
+          <div class="bar-row">
+            <span class="bar-label" title="${c}">${c}</span>
+            <div class="bar-track"><div class="bar-fill" style="width:${pct}%;"></div></div>
+            <span style="width:30px;">${cnt}건</span>
+          </div>`;
+      }).join('');
+
+      const classMap = {};
+      filtered.forEach(r => {
+        const g = r.studentId.substring(0, r.studentId.length - 2);
+        classMap[g] = (classMap[g] || 0) + 1;
+      });
+      const classKeys = Object.keys(classMap).sort();
+      const maxClass = Math.max(...Object.values(classMap), 1);
+      document.getElementById('classChartContainer').innerHTML = classKeys.length ? classKeys.map(k => {
+        const cnt = classMap[k];
+        const pct = (cnt / maxClass) * 100;
+        return `
+          <div class="bar-row">
+            <span class="bar-label">${k}반</span>
+            <div class="bar-track"><div class="bar-fill" style="width:${pct}%; background:linear-gradient(90deg, #6366f1 0%, #818cf8 100%);"></div></div>
+            <span style="width:30px;">${cnt}건</span>
+          </div>`;
+      }).join('') : '<div style="text-align:center; color:#94a3b8; padding:20px;">기록 없음</div>';
+
+      const active = students.map(s => {
+        const sRecs = filtered.filter(r => r.studentId === s.id);
+        const sub = sRecs.filter(r => r.reflectionSubmitted).length;
+        const ratio = sRecs.length ? ((sub / sRecs.length) * 100).toFixed(1) : '0.0';
+
+        const counts = {};
+        sRecs.forEach(r => {
+          const types = Array.isArray(r.type) ? r.type : [r.type];
+          types.forEach(t => { if (t) counts[t] = (counts[t] || 0) + 1; });
+        });
+        let topCat = '-'; let max = 0;
+        for (const [k,v] of Object.entries(counts)) { if (v > max) { max = v; topCat = k; } }
+
+        return { id: s.id, name: s.name, total: sRecs.length, sub, ratio, topCat };
+      }).filter(s => s.total > 0).sort((a,b) => b.total - a.total);
+
+      document.getElementById('filteredStudentCountBadge').textContent = `${active.length}명`;
+      const tbody = document.getElementById('statsStudentTableBody');
+      if (!active.length) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px; color:#94a3b8;">해당 월에 위반 기록이 있는 학생이 없습니다.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = active.map(s => `
+        <tr>
+          <td><strong>${s.id}</strong></td>
+          <td>${s.name}</td>
+          <td style="color:#4338ca; font-weight:bold;">${s.total}회</td>
+          <td style="color:#059669; font-weight:bold;">${s.sub}건 제출</td>
+          <td>${s.ratio}% (${s.sub}/${s.total})</td>
+          <td><span style="background:#f1f5f9; padding:2px 6px; border-radius:4px;">${s.topCat}</span></td>
+        </tr>
+      `).join('');
+    }
+
+    function renderYearlyStats() {
+      const yearVal = document.getElementById('statsYearPicker').value;
+      if (!yearVal) return;
+
+      const filtered = records.filter(r => r.date.startsWith(yearVal));
+
+      const cats = violationCategories;
+      const maxCat = Math.max(...cats.map(c => filtered.filter(r => {
+        if (Array.isArray(r.type)) return r.type.includes(c);
+        return r.type === c;
+      }).length), 1);
+
+      document.getElementById('yearlyCatChartContainer').innerHTML = cats.map(c => {
+        const cnt = filtered.filter(r => {
+          if (Array.isArray(r.type)) return r.type.includes(c);
+          return r.type === c;
+        }).length;
+        const pct = (cnt / maxCat) * 100;
+        return `
+          <div class="bar-row">
+            <span class="bar-label" title="${c}">${c}</span>
+            <div class="bar-track"><div class="bar-fill" style="width:${pct}%; background:linear-gradient(90deg, #3b82f6 0%, #60a5fa 100%);"></div></div>
+            <span style="width:30px;">${cnt}건</span>
+          </div>`;
+      }).join('');
+
+      const classMap = {};
+      filtered.forEach(r => {
+        const g = r.studentId.substring(0, r.studentId.length - 2);
+        classMap[g] = (classMap[g] || 0) + 1;
+      });
+      const classKeys = Object.keys(classMap).sort();
+      const maxClass = Math.max(...Object.values(classMap), 1);
+      document.getElementById('yearlyClassChartContainer').innerHTML = classKeys.length ? classKeys.map(k => {
+        const cnt = classMap[k];
+        const pct = (cnt / maxClass) * 100;
+        return `
+          <div class="bar-row">
+            <span class="bar-label">${k}반</span>
+            <div class="bar-track"><div class="bar-fill" style="width:${pct}%; background:linear-gradient(90deg, #4338ca 0%, #6366f1 100%);"></div></div>
+            <span style="width:30px;">${cnt}건</span>
+          </div>`;
+      }).join('') : '<div style="text-align:center; color:#94a3b8; padding:20px;">기록 없음</div>';
+
+      const active = students.map(s => {
+        const sRecs = filtered.filter(r => r.studentId === s.id);
+        const sub = sRecs.filter(r => r.reflectionSubmitted).length;
+        const ratio = sRecs.length ? ((sub / sRecs.length) * 100).toFixed(1) : '0.0';
+
+        const counts = {};
+        sRecs.forEach(r => {
+          const types = Array.isArray(r.type) ? r.type : [r.type];
+          types.forEach(t => { if (t) counts[t] = (counts[t] || 0) + 1; });
+        });
+        let topCat = '-'; let max = 0;
+        for (const [k,v] of Object.entries(counts)) { if (v > max) { max = v; topCat = k; } }
+
+        return { id: s.id, name: s.name, total: sRecs.length, sub, ratio, topCat };
+      }).filter(s => s.total > 0).sort((a,b) => b.total - a.total);
+
+      document.getElementById('yearlyStudentCountBadge').textContent = `${active.length}명`;
+      const tbody = document.getElementById('yearlyStudentTableBody');
+      if (!active.length) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px; color:#94a3b8;">해당 연도에 위반 기록이 있는 학생이 없습니다.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = active.map(s => `
+        <tr>
+          <td><strong>${s.id}</strong></td>
+          <td>${s.name}</td>
+          <td style="color:#4338ca; font-weight:bold;">${s.total}회</td>
+          <td style="color:#059669; font-weight:bold;">${s.sub}건 제출</td>
+          <td>${s.ratio}% (${s.sub}/${s.total})</td>
+          <td><span style="background:#f1f5f9; padding:2px 6px; border-radius:4px;">${s.topCat}</span></td>
+        </tr>
+      `).join('');
+    }
+
+    // Modal Operations
+    function openBatchModal() { 
+      if (isReadOnlyArchive) { alert('과거 보관 데이터 조회 중에는 등록할 수 없습니다.'); return; }
+      document.getElementById('batchModal').classList.remove('hidden'); 
+    }
+    function closeBatchModal() { document.getElementById('batchModal').classList.add('hidden'); }
+
+    // 위반 항목 관리 모달
+    function openViolationConfigModal() {
+      if (!currentUser || currentUser.role !== 'admin') return;
+      renderViolationConfigList();
+      document.getElementById('violationConfigModal').classList.remove('hidden');
+    }
+    function closeViolationConfigModal() { document.getElementById('violationConfigModal').classList.add('hidden'); }
+
+    function renderViolationConfigList() {
+      const tbody = document.getElementById('violationConfigTableBody');
+      tbody.innerHTML = violationCategories.map((cat, idx) => `
+        <tr>
+          <td><strong>${cat}</strong></td>
+          <td style="text-align:center;">
+            <button class="btn btn-rose" style="padding:2px 8px; font-size:11px;" onclick="deleteViolationCategory(${idx})">삭제</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function addViolationCategory() {
+      const input = document.getElementById('newViolationInput');
+      const val = input.value.trim();
+      if (!val) { alert('추가할 위반 항목 이름을 입력하세요.'); return; }
+      if (violationCategories.includes(val)) { alert('이미 존재하는 위반 항목입니다.'); return; }
+
+      violationCategories.push(val);
+      input.value = '';
+      saveData();
+      renderViolationConfigList();
+      alert(`[${val}] 위반 항목이 추가되었습니다.`);
+    }
+
+    function deleteViolationCategory(index) {
+      if (violationCategories.length <= 1) {
+        alert('최소 1개 이상의 위반 항목이 유지되어야 합니다.');
+        return;
+      }
+      const target = violationCategories[index];
+      if (confirm(`[${target}] 위반 항목을 삭제하시겠습니까?`)) {
+        violationCategories.splice(index, 1);
+        selectedViolations.delete(target);
+        saveData();
+        renderViolationConfigList();
+      }
+    }
+
+    // 학생 명단 관리 모달 오픈
+    function openStudentManageModal() {
+      if (!currentUser || currentUser.role !== 'admin') return;
+      selectedStudentIds.clear();
+      renderStudentManageList();
+      document.getElementById('studentManageModal').classList.remove('hidden');
+    }
+    function closeStudentManageModal() { document.getElementById('studentManageModal').classList.add('hidden'); }
+
+    function renderStudentManageList() {
+      const tbody = document.getElementById('studentManageTableBody');
+      if (!students.length) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:#94a3b8;">등록된 학생이 없습니다.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = students.map(s => {
+        const sRecsCount = records.filter(r => r.studentId === s.id).length;
+        const isChecked = selectedStudentIds.has(s.id);
+        return `
+          <tr>
+            <td><input type="checkbox" class="student-item-checkbox" style="accent-color:#4338ca;" ${isChecked ? 'checked' : ''} onchange="toggleStudentSelection('${s.id}', this.checked)"></td>
+            <td><strong>${s.id}</strong></td>
+            <td>${s.name}</td>
+            <td>${sRecsCount}건</td>
+            <td>
+              <button class="btn btn-rose" style="padding:2px 8px; font-size:11px;" onclick="deleteOneStudent('${s.id}')">삭제</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+      updateSelectedStudentCountUI();
+    }
+
+    function toggleStudentSelection(id, checked) {
+      if (checked) selectedStudentIds.add(id);
+      else selectedStudentIds.delete(id);
+      updateSelectedStudentCountUI();
+    }
+
+    function toggleSelectAllStudents(checked) {
+      students.forEach(s => {
+        if (checked) selectedStudentIds.add(s.id);
+        else selectedStudentIds.delete(s.id);
+      });
+      document.querySelectorAll('.student-item-checkbox').forEach(cb => cb.checked = checked);
+      updateSelectedStudentCountUI();
+    }
+
+    function updateSelectedStudentCountUI() {
+      document.getElementById('selectedStudentCount').textContent = selectedStudentIds.size;
+      const allCb = document.getElementById('selectAllStudentsCheckbox');
+      if (allCb && students.length > 0) {
+        allCb.checked = students.every(s => selectedStudentIds.has(s.id));
+      }
+    }
+
+    function deleteOneStudent(id) {
+      if (isReadOnlyArchive) { alert('과거 보관 데이터는 삭제할 수 없습니다.'); return; }
+      const s = students.find(st => st.id === id);
+      const targetName = s ? s.name : id;
+
+      if (confirm(`⚠️ 경고: [${targetName} (${id})] 학생을 삭제하시겠습니까?\n\n학생을 삭제할 경우 해당 학생의 모든 위반 지도 기록 및 성찰문 이력도 함께 영구 삭제됩니다.`)) {
+        students = students.filter(st => st.id !== id);
+        records = records.filter(r => r.studentId !== id);
+        selectedStudentIds.delete(id);
+        if (selectedStudentId === id) selectedStudentId = null;
+        saveData();
+        renderStudentManageList();
+        alert('학생 및 연관된 기록이 삭제되었습니다.');
+      }
+    }
+
+    function deleteSelectedStudents() {
+      if (isReadOnlyArchive) { alert('과거 보관 데이터는 삭제할 수 없습니다.'); return; }
+      if (selectedStudentIds.size === 0) {
+        alert('삭제할 학생을 체크박스로 선택해 주세요.');
+        return;
+      }
+
+      if (confirm(`⚠️ 경고: 선택한 ${selectedStudentIds.size}명의 학생을 정말로 삭제하시겠습니까?\n\n삭제 시 해당 학생들의 모든 위반 지도 및 성찰문 이력도 함께 영구 삭제됩니다.`)) {
+        const idsToRemove = new Set(selectedStudentIds);
+        students = students.filter(s => !idsToRemove.has(s.id));
+        records = records.filter(r => !idsToRemove.has(r.studentId));
+        selectedStudentIds.clear();
+        if (selectedStudentId && idsToRemove.has(selectedStudentId)) selectedStudentId = null;
+        saveData();
+        renderStudentManageList();
+        alert('선택한 학생 및 연관 기록이 일괄 삭제되었습니다.');
+      }
+    }
+
+    // 교사 관리 모달
+    function openTeacherModal() {
+      if (currentUser.role !== 'admin') return;
+      selectedTeacherIds.clear();
+      renderTeacherList();
+      document.getElementById('teacherModal').classList.remove('hidden');
+    }
+    function closeTeacherModal() { document.getElementById('teacherModal').classList.add('hidden'); }
+
+    function handleAddTeacher(e) {
+      e.preventDefault();
+      if (isReadOnlyArchive) { alert('과거 보관 데이터 조회 중에는 등록할 수 없습니다.'); return; }
+
+      const id = document.getElementById('newTeacherId').value.trim();
+      const pw = document.getElementById('newTeacherPw').value.trim();
+      const name = document.getElementById('newTeacherName').value.trim();
+      const role = document.getElementById('newTeacherRole').value;
+      const assignedClass = document.getElementById('newTeacherClass').value.trim();
+
+      if (teachers.some(t => t.id === id)) {
+        alert('이미 존재하는 교사 아이디입니다.');
+        return;
+      }
+
+      teachers.push({ id, pw, name, role, assignedClass });
+      saveTeachers();
+      renderTeacherList();
+
+      document.getElementById('newTeacherId').value = '';
+      document.getElementById('newTeacherPw').value = '';
+      document.getElementById('newTeacherName').value = '';
+      document.getElementById('newTeacherClass').value = '';
+      alert('새 교사 계정이 성공적으로 추가되었습니다.');
+    }
+
+    function downloadTeacherSampleCSV() {
+      const content = "\uFEFF아이디,비밀번호,이름,권한,담당학급\nteacher2,1234,김철수,teacher,105\nteacher3,1234,이영희,teacher,\nadmin2,1234,박관리,admin,";
+      const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = '교사계정등록_양식.csv';
+      link.click();
+    }
+
+    function handleTeacherFileUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = evt => document.getElementById('batchTeacherInputText').value = evt.target.result;
+      reader.readAsText(file);
+    }
+
+    function processBatchTeacherRegister() {
+      if (isReadOnlyArchive) { alert('과거 보관 데이터 조회 중에는 등록할 수 없습니다.'); return; }
+      const text = document.getElementById('batchTeacherInputText').value.trim();
+      if (!text) { alert('등록할 내용을 입력하세요.'); return; }
+
+      let count = 0;
+      text.split('\n').forEach(line => {
+        const parts = line.split(/[,;\t]/).map(p => p.trim());
+        if (parts.length >= 3 && parts[0] && parts[1] && parts[2] && parts[0] !== '아이디') {
+          if (!teachers.some(t => t.id === parts[0])) {
+            teachers.push({
+              id: parts[0],
+              pw: parts[1],
+              name: parts[2],
+              role: parts[3] || 'teacher',
+              assignedClass: parts[4] || ''
+            });
+            count++;
+          }
+        }
+      });
+      saveTeachers();
+      renderTeacherList();
+      document.getElementById('batchTeacherInputText').value = '';
+      alert(`총 ${count}명의 신규 교사 계정이 누적 등록되었습니다.`);
+    }
+
+    function deleteTeacher(id) {
+      if (isReadOnlyArchive) { alert('과거 보관 데이터는 삭제할 수 없습니다.'); return; }
+      if (id === '관리자') { alert('최고 관리자 계정은 삭제할 수 없습니다.'); return; }
+      if (confirm(`⚠️ 경고: 교사 계정(${id})을 삭제하시겠습니까?\n\n교사 계정을 삭제할 경우 해당 교사가 기록한 지도 내역 등은 유지되나 계정 접근이 불가해집니다.`)) {
+        teachers = teachers.filter(t => t.id !== id);
+        selectedTeacherIds.delete(id);
+        saveTeachers();
+        renderTeacherList();
+      }
+    }
+
+    function toggleTeacherSelection(id, checked) {
+      if (checked) selectedTeacherIds.add(id);
+      else selectedTeacherIds.delete(id);
+      updateSelectedTeacherCountUI();
+    }
+
+    function toggleSelectAllTeachers(checked) {
+      teachers.forEach(t => {
+        if (t.id !== '관리자') {
+          if (checked) selectedTeacherIds.add(t.id);
+          else selectedTeacherIds.delete(t.id);
+        }
+      });
+      document.querySelectorAll('.teacher-item-checkbox').forEach(cb => cb.checked = checked);
+      updateSelectedTeacherCountUI();
+    }
+
+    function updateSelectedTeacherCountUI() {
+      document.getElementById('selectedTeacherCount').textContent = selectedTeacherIds.size;
+      const nonAdminTeachers = teachers.filter(t => t.id !== '관리자');
+      const allCb = document.getElementById('selectAllTeachersCheckbox');
+      if (allCb && nonAdminTeachers.length > 0) {
+        allCb.checked = nonAdminTeachers.every(t => selectedTeacherIds.has(t.id));
+      }
+    }
+
+    function deleteSelectedTeachers() {
+      if (isReadOnlyArchive) { alert('과거 보관 데이터는 삭제할 수 없습니다.'); return; }
+      if (selectedTeacherIds.size === 0) {
+        alert('삭제할 교사를 체크박스로 선택해 주세요.');
+        return;
+      }
+
+      if (confirm(`⚠️ 경고: 선택한 ${selectedTeacherIds.size}명의 교사 계정을 정말로 삭제하시겠습니까?`)) {
+        teachers = teachers.filter(t => t.id === '관리자' || !selectedTeacherIds.has(t.id));
+        selectedTeacherIds.clear();
+        saveTeachers();
+        renderTeacherList();
+        alert('선택한 교사 계정이 일괄 삭제되었습니다.');
+      }
+    }
+
+    function renderTeacherList() {
+      const tbody = document.getElementById('teacherTableBody');
+      tbody.innerHTML = teachers.map(t => {
+        const isChecked = selectedTeacherIds.has(t.id);
+        return `
+          <tr>
+            <td>${t.id !== '관리자' ? `<input type="checkbox" class="teacher-item-checkbox" style="accent-color:#4338ca;" ${isChecked ? 'checked' : ''} onchange="toggleTeacherSelection('${t.id}', this.checked)">` : ''}</td>
+            <td><strong>${t.id}</strong></td>
+            <td>${t.name}</td>
+            <td><span class="user-badge ${t.role === 'admin' ? 'badge-admin' : (t.assignedClass ? 'badge-teacher' : 'badge-sub')}">${t.role === 'admin' ? '관리자' : (t.assignedClass ? '담임' : '비담임')}</span></td>
+            <td>${t.assignedClass ? t.assignedClass + '반' : '비담임'}</td>
+            <td>
+              ${(t.id !== '관리자' && !isReadOnlyArchive) ? `<button class="btn btn-rose" style="padding:2px 8px; font-size:11px;" onclick="deleteTeacher('${t.id}')">삭제</button>` : '-'}
+            </td>
+          </tr>
+        `;
+      }).join('');
+      updateSelectedTeacherCountUI();
+    }
+
+    function downloadSampleCSV() {
+      const content = "\uFEFF학번,이름\n10501,강해린\n10502,김민지\n10503,팜하니\n20101,이동욱\n20102,박보검";
+      const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = '학생등록_양식.csv';
+      link.click();
+    }
+
+    function handleFileUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = evt => document.getElementById('batchInputText').value = evt.target.result;
+      reader.readAsText(file);
+    }
+
+    function processBatchRegister() {
+      if (isReadOnlyArchive) { alert('과거 보관 데이터 조회 중에는 등록할 수 없습니다.'); return; }
+      const text = document.getElementById('batchInputText').value.trim();
+      if (!text) { alert('등록할 학생 명단을 입력하세요.'); return; }
+
+      let addedCount = 0;
+      text.split('\n').forEach(line => {
+        const parts = line.split(/[,;\t]/).map(p => p.trim());
+        if (parts.length >= 2 && parts[0] && parts[1] && parts[0] !== '학번') {
+          if (!students.some(s => s.id === parts[0])) {
+            students.push({ id: parts[0], name: parts[1] });
+            addedCount++;
+          }
+        }
+      });
+
+      saveData();
+      closeBatchModal();
+      document.getElementById('batchInputText').value = '';
+      alert(`총 ${addedCount}명의 신규 학생이 기존 명단에 누적 등록되었습니다.`);
+    }
+
+    // 엑셀 다중 시트 생성 및 다운로드 핵심 함수
+    function exportMultiSheetExcel(filteredRecs, titlePrefix, filename) {
+      if (!filteredRecs.length) { alert('출력할 데이터가 없습니다.'); return; }
+
+      // 1시트: 개별 상세 지도 이력
+      const sheet1Data = [
+        ["학번", "이름", "날짜", "위반항목", "성찰문제출여부", "등록교사", "등록시각", "세부메모"]
+      ];
+      filteredRecs.forEach(r => {
+        const s = students.find(st => st.id === r.studentId) || { name: '미등록' };
+        const typeStr = Array.isArray(r.type) ? r.type.join(', ') : r.type;
+        sheet1Data.push([
+          r.studentId,
+          s.name,
+          r.date,
+          typeStr,
+          r.reflectionSubmitted ? '제출완료' : '미제출',
+          r.teacherName || '',
+          r.createdAt || '',
+          r.note || ''
+        ]);
+      });
+
+      // 2시트: 학생별 위반 집계
+      const sheet2Data = [
+        ["학번", "이름", "총 위반 횟수", "성찰문 제출 횟수", "성찰문 제출율(%)", "주요 위반 항목"]
+      ];
+      const studentMap = {};
+      filteredRecs.forEach(r => {
+        if (!studentMap[r.studentId]) {
+          const s = students.find(st => st.id === r.studentId) || { name: '미등록' };
+          studentMap[r.studentId] = { id: r.studentId, name: s.name, total: 0, sub: 0, cats: {} };
+        }
+        studentMap[r.studentId].total++;
+        if (r.reflectionSubmitted) studentMap[r.studentId].sub++;
+        const types = Array.isArray(r.type) ? r.type : [r.type];
+        types.forEach(t => {
+          if (t) studentMap[r.studentId].cats[t] = (studentMap[r.studentId].cats[t] || 0) + 1;
+        });
+      });
+
+      const studentStatsArr = Object.values(studentMap).sort((a,b) => b.total - a.total);
+      studentStatsArr.forEach(st => {
+        const ratio = st.total ? ((st.sub / st.total) * 100).toFixed(1) : '0.0';
+        let topCat = '-'; let maxCnt = 0;
+        for (const [k,v] of Object.entries(st.cats)) {
+          if (v > maxCnt) { maxCnt = v; topCat = k; }
+        }
+        sheet2Data.push([st.id, st.name, st.total, st.sub, `${ratio}%`, topCat]);
+      });
+
+      // 3시트: 학급별 위반 집계
+      const sheet3Data = [
+        ["학년·반", "총 위반 건수"]
+      ];
+      const classMap = {};
+      filteredRecs.forEach(r => {
+        const g = r.studentId.substring(0, r.studentId.length - 2);
+        classMap[g] = (classMap[g] || 0) + 1;
+      });
+      const sortedClasses = Object.keys(classMap).sort();
+      sortedClasses.forEach(cls => {
+        sheet3Data.push([`${cls}반`, classMap[cls]]);
+      });
+
+      const wb = XLSX.utils.book_new();
+      
+      const ws1 = XLSX.utils.aoa_to_sheet(sheet1Data);
+      const ws2 = XLSX.utils.aoa_to_sheet(sheet2Data);
+      const ws3 = XLSX.utils.aoa_to_sheet(sheet3Data);
+
+      XLSX.utils.book_append_sheet(wb, ws1, "상세 지도 이력");
+      XLSX.utils.book_append_sheet(wb, ws2, "학생별 위반 집계");
+      XLSX.utils.book_append_sheet(wb, ws3, "학급별 위반 집계");
+
+      XLSX.writeFile(wb, filename);
+    }
+
+    function exportMonthlyExcel() {
+      const monthVal = document.getElementById('statsMonthPicker').value;
+      const filtered = records.filter(r => r.date.startsWith(monthVal));
+      exportMultiSheetExcel(filtered, '월별', `이음스쿨_월별통계_${selectedViewingYear}년_${monthVal}.xlsx`);
+    }
+
+    function exportYearlyExcel() {
+      const yearVal = document.getElementById('statsYearPicker').value;
+      const filtered = records.filter(r => r.date.startsWith(yearVal));
+      exportMultiSheetExcel(filtered, '연간', `이음스쿨_연간통계_${yearVal}년도.xlsx`);
+    }
+  </script>
+</body>
+</html>
